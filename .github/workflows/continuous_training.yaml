@@ -21,17 +21,17 @@ jobs: #Jobs to run
         env:
           SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }} #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
         run: |
-        pip3 install virtualenv
-        virtualenv venv
-        source venv/bin/activate
-        pip install -r src/requirements.txt
-        export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
-        dvc pull model/model.pkl.dvc -r model-tracker 
-        dvc unprotec model/model.pkl
-        dvc repro -f
-        echo "Training Completed"
-        dvc add model/model.pkl.dvc -r model-tracker --to-remote
-        dvc push model/model.pkl.dvc -r model-tracker
+          pip3 install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+          pip install -r src/requirements.txt
+          export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
+          dvc pull model/model.pkl.dvc -r model-tracker 
+          dvc unprotec model/model.pkl
+          dvc repro -f
+          echo "Training Completed"
+          dvc add model/model.pkl.dvc -r model-tracker --to-remote
+          dvc push model/model.pkl.dvc -r model-tracker
       - name: Commit .dvc file changes #After pushing the model to cloud, we want to commit it to github
         run: |
           git config --local user.email "martinmoreno313@gmail.com"
