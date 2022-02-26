@@ -1,5 +1,19 @@
 name: Continuous Integration/Continuous Deployment
-on: [push]
+on:
+  push:
+    branches:
+      -master
+  workflow_run:
+    workflows: ["Continuous Training"] #Will run each time that CT is run
+    branches: [master]
+    types:
+      - completed #The workflow has to be completed
+  workflow_dispatch: #In case we want to run it manually
+  inputs:
+    reason: #Provde a reason to run this workflow
+      description: Why to run this?
+      required: false
+      default: running CI/CD
 jobs:
   ci_cd:
     runs-on: ubuntu-latest
