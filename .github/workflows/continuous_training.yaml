@@ -20,7 +20,7 @@ jobs: #Jobs to run
       - name: Train Model
         env:
           SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }} #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
-        run: |
+        run: | #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
           pip3 install virtualenv
           virtualenv venv
           source venv/bin/activate
