@@ -19,8 +19,8 @@ jobs: #Jobs to run
         uses: actions/checkout@v2 #Use checkout@v2 actions to pull repo
       - name: Train Model
         env:
-          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-        run: | #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
+          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }} #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
+        run: |
         pip3 install virtualenv
         virtualenv venv
         source venv/bin/activate
