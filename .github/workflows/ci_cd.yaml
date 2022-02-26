@@ -1,16 +1,16 @@
 name: Continuous Integration/Continuous Deployment
-on:
+on: 
   push:
-    branches:
-      -master
+     branches:
+      - main 
   workflow_run:
     workflows: ["Continuous Training"] #Will run each time that CT is run
-    branches: [master]
+    branches: [main]
     types:
       - completed #The workflow has to be completed
   workflow_dispatch: #In case we want to run it manually
     inputs:
-      reason: #Provde a reason to run this workflow
+      reason:
         description: Why to run this?
         required: false
         default: running CI/CD
@@ -25,13 +25,13 @@ jobs:
       SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Set environment and bring the model
         run: |
           pip3 install virtualenv
           virtualenv venv
           source venv/bin/activate
-          pip install dvc[gs] 
+          pip install dvc[gs]
           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
           dvc pull model/model.pkl.dvc -r model-tracker
       - name: Set up GCLOUD SDK
@@ -39,8 +39,8 @@ jobs:
         with:
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.PROJECT_ID }}
-      - name: Build and Push
-        run: | #GITHUB_SHA is a default variable from github actions
+      - name: Build and Push #GITHUB_SHA is a default variable from github actions
+        run: |
           docker build . -t $REGISTRY_NAME:$GITHUB_SHA
           gcloud auth configure-docker -q
           sudo -u $USER docker push $REGISTRY_NAME:$GITHUB_SHA
