@@ -2,57 +2,54 @@ name: Continuous Training
 on:
   push:
     branches:
-      -workflow_continuous_training
+      - workflow_continuous_training
   schedule:
     - cron: '0 */6 * * *' #Workflow will run every 6 hours
   workflow_dispatch: #In case we want to run it manually
     inputs:
       reason: #Provde a reason to run this workflow
         description: Why to run this?
-        required: false  
-        deafault: running CT
-jobs: #Jobs to run
+        required: false
+        default: running CT
+jobs:
   continuous-training:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2 #Use checkout@v2 actions to pull repo
-      - name: Train Model
-        env:
+        uses: actions/checkout@v2
+      - name: Train model
+        env: 
           SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }} #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
         run: | #Pull model from  dvc - (unprotect allow us to update the model) -> Repro runs all the pipeline
-          pip3 install virtualenv
-          virtualenv venv
-          source venv/bin/activate
-          pip install -r src/requirements.txt
-          export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
-          dvc pull model/model.pkl.dvc -r model-tracker 
-          dvc unprotec model/model.pkl
-          dvc repro -f
-          echo "Training Completed"
-          dvc add model/model.pkl.dvc -r model-tracker --to-remote
-          dvc push model/model.pkl.dvc -r model-tracker
+           pip3 install virtualenv
+           virtualenv venv
+           source venv/bin/activate
+           pip install -r src/requirements.txt
+           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
+           dvc pull model/model.pkl.dvc -r model-tracker
+           dvc unprotect model/model.pkl
+           dvc repro -f 
+           echo "Training Completed"
+           dvc add model/model.pkl -r model-tracker --to-remote
+           dvc push model/model.pkl.dvc -r model-tracker
       - name: Commit .dvc file changes #After pushing the model to cloud, we want to commit it to github
         run: |
           git config --local user.email "martinmoreno313@gmail.com"
-          git config --local user.name "github:actions[bot]"
+          git config --local user.name "github-actions[bot]"
           git add model/model.pkl.dvc
           git commit -m "Updating model serialization"
       - uses: ad-m/github-push-action@master #Github action already developed for pushing repos
-        with: 
-          github_token: ${{ secrets.GITHUB_TOKEN }} #This secret already exists in Github by default
-          branch: ${{ github.ref }} #Reference branch and commit variables
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }} #This secret already exists in Github by default
+            branch: ${{ github.ref }} #Reference branch and commit variables
       - uses: iterative/setup-cml@v1 #Github action for submitting into CML
       - name: Push metrics #Push metrics to continuous ML Create Markdown reports sending it to our commit
-        env: 
+        env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat report.txt >> report.md
-          cml-publish Prediction_behaviour.png --md >> report.md
-          cml-send-comment report.ml
-
-
-
+          cat report.txt >> report.md 
+          cml-publish prediction_behavior.png --md >> report.md
+          cml-send-comment report.md
 
 
 
